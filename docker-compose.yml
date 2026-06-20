@@ -1,0 +1,110 @@
+# docker-compose.yml — orchestration file: defines all 4 containers,
+# how they're built, what ports they expose, and how they connect to
+# each other. Docker Compose automatically creates a shared private
+# network where each service can reach the others by name
+# (e.g. "db", "app") instead of an IP address.
+
+services:
+
+  # ── PHP application container ───────────────────────────────────
+  app:
+    # Build this image from the Dockerfile in the current directory,
+    # rather than pulling a pre-made image.
+    build: .
+
+    # Load every KEY=VALUE pair from .env and inject them as real
+    # environment variables inside this container. This is what makes
+    # getenv('MYSQL_DATABASE') work inside index.php.
+    env_file:
+      - .env
+
+    # Bind-mount: link the local ./src folder directly into the
+    # container's /var/www/html. Edits to .php files on your machine
+    # show up immediately inside the container — no rebuild needed.
+    volumes:
+      - ./src:/var/www/html
+
+    # Wait for the "db" service to be STARTED before starting this one.
+    # NOTE: this only guarantees container start order, not that
+    # MySQL has finished initializing — that's why index.php has a
+    # try/catch around the connection attempt.
+    depends_on:
+      - db
+
+  # ── Web server container ────────────────────────────────────────
+  nginx:
+    # Use the official lightweight (Alpine Linux based) Nginx image —
+    # no custom Dockerfile needed since we're not changing the binary,
+    # only its config file (mounted below).
+    image: nginx:alpine
+
+    # Map "host_port:container_port".
+    # Visiting http://localhost:8080 on your machine reaches port 80
+    # inside this container.
+    ports:
+      - "8080:80"
+
+    volumes:
+      # Same source folder as "app", so Nginx can serve static files
+      # (images, CSS, etc.) directly without going through PHP.
+      - ./src:/var/www/html
+      # Overwrite Nginx's default config with our custom routing rules.
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+    # Start after "app" so the PHP-FPM process nginx forwards to exists.
+    depends_on:
+      - app
+
+  # ── MySQL database container ────────────────────────────────────
+  db:
+    image: mysql:8.0
+
+    # MySQL's own startup script reads these environment variables
+    # on FIRST boot only, and automatically:
+    #   - sets the root password
+    #   - creates the named database
+    #   - creates the named user with the given password
+    #   - grants that user full access to that database
+    # ${VAR_NAME} syntax pulls these values from the .env file.
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    # Host port 3307 (not 3306) because a separate, locally-installed
+    # MySQL is likely already using 3306 on this machine. Only needed
+    # if you want to connect from OUTSIDE Docker (e.g. MySQL Workbench);
+    # "app" and "phpmyadmin" reach this container internally via the
+    # "db" hostname on port 3306 regardless of this mapping.
+    ports:
+      - "3307:3306"
+
+    # Named volume (managed by Docker, not a folder you can browse
+    # directly) — this is where MySQL's actual data files live.
+    # It persists across "docker compose down" and container rebuilds;
+    # only "docker compose down -v" deletes it.
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # ── phpMyAdmin (database GUI) container ─────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+
+    # Visiting http://localhost:8081 reaches this container's port 80.
+    ports:
+      - "8081:80"
+
+    # Tells phpMyAdmin which database server to offer as the login
+    # target — it does NOT pre-fill the username/password, you still
+    # type those into phpMyAdmin's own login form.
+    environment:
+      PMA_HOST: db
+
+    depends_on:
+      - db
+
+# Declares "db_data" as a named volume so Docker creates and manages
+# it. Referenced above under the "db" service.
+volumes:
+  db_data:

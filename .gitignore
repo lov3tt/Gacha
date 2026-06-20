@@ -1,0 +1,41 @@
+# .gitignore — tells Git which files/folders to NEVER track or commit.
+# Anything matching a pattern below stays on your local machine only.
+# IMPORTANT: comments must be on their OWN line — Git does not support
+# trailing "pattern # comment" on the same line.
+
+# Docker — local override file some setups use for personal tweaks
+# to docker-compose.yml that shouldn't apply to everyone on the team
+docker-compose.override.yml
+
+# Environment / secrets — contains real passwords, must never enter
+# Git history (history is forever, even if you delete the file later)
+.env
+.env.local
+.env.*.local
+
+# PHP / Composer
+# third-party packages — regenerated via "composer install", no need
+# to bloat the repo with them
+/vendor/
+# the Composer tool binary itself, if downloaded locally
+composer.phar
+# test runner cache, machine-specific
+.phpunit.result.cache
+
+# OS files — metadata Finder/Explorer create automatically, irrelevant to the project
+.DS_Store
+Thumbs.db
+
+# Editor / IDE — personal editor settings, differ per developer
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs — runtime output, not source code, regenerated automatically
+*.log
+storage/logs/
+
+# Local data — only relevant if you ever bind-mount MySQL data to a
+# local folder instead of using the named volume "db_data"
+/mysql-data/
