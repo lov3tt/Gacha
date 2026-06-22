@@ -3,6 +3,10 @@
 # IMPORTANT: comments must be on their OWN line — Git does not support
 # trailing "pattern # comment" on the same line.
 
+# Dev-only files — delete before going to production
+# test.php is a DB connection smoke test, not part of the actual app
+src/test.php
+
 # Docker — local override file some setups use for personal tweaks
 # to docker-compose.yml that shouldn't apply to everyone on the team
 docker-compose.override.yml

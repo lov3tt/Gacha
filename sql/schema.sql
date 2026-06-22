@@ -23,5 +23,9 @@ CREATE TABLE IF NOT EXISTS pulls (
 
     -- FOREIGN KEY: enforces that item_id must match a real row in "items".
     -- Prevents "orphan" pulls referencing items that don't exist.
-    FOREIGN KEY (item_id) REFERENCES items(id)
+    FOREIGN KEY (item_id) REFERENCES items(id),
+
+    -- INDEX: speeds up "WHERE user_id = ?" queries — without this,
+    -- MySQL scans every row in the table every time history is fetched.
+    INDEX idx_user_id (user_id)
 );
