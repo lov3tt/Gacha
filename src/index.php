@@ -132,16 +132,16 @@ function rollRarity(int $pityCount, int $pityCount4star): int
     //   80%      → 40%    (800 → 400)
     //   95%      → 47.5%  (950 → 475)
     $rateTable = [
-        0 =>   1,   // pull  1–10:  0.05% (minimum 1 to keep non-zero chance)
-        1 =>  12,   // pull 11–20:  1.25%
-        2 =>  25,   // pull 21–30:  2.5%
-        3 =>  50,   // pull 31–40:  5%
-        4 => 75,   // pull 41–50:  7.5%
-        5 => 100,   // pull 51–60:  10.0%
-        6 => 250,   // pull 61–70:  25%
-        7 => 325,   // pull 71–80:  32.5%
-        8 => 400,   // pull 81–90:  40%
-        9 => 475,   // pull 91–99:  47.5%
+        0 =>   1,   // pull  1–10:  0.1% (minimum 1 to keep non-zero chance)
+        1 =>  10,   // pull 11–20:  1.0%
+        2 =>  20,   // pull 21–30:  2.0%
+        3 =>  30,   // pull 31–40:  3.0%
+        4 => 40,   // pull 41–50:  4.0%
+        5 => 50,   // pull 51–60:  5.0%
+        6 => 60,   // pull 61–70:  6.0%
+        7 => 70,   // pull 71–80:  7.0%
+        8 => 80,   // pull 81–90:  8.0%
+        9 => 200,   // pull 91–99:  20.0%
     ];
 
     // Look up the threshold for the current stage.
@@ -174,16 +174,16 @@ function getCurrentFiveStarRate(int $pityCount): float
 
     $stage = intdiv($pityCount, 10);
     $rateTable = [
-        0 => 0.05,   // pull  1–10:  0.05%
-        1 => 1.25,   // pull 11–20:  1.25%
-        2 => 2.5,    // pull 21–30:  2.5%
-        3 => 5.0,    // pull 31–40:  5%
-        4 => 7.5,   // pull 41–50:  7.5%
-        5 => 10.0,   // pull 51–60:  10.0%
-        6 => 25.0,   // pull 61–70:  25%
-        7 => 32.5,   // pull 71–80:  32.5%
-        8 => 40.0,   // pull 81–90:  40%
-        9 => 47.5,   // pull 91–99:  47.5%
+        0 => 0.1,   // pull  1–10:  0.05%
+        1 => 1.0,   // pull 11–20:  1.25%
+        2 => 2.0,    // pull 21–30:  2.5%
+        3 => 3.0,    // pull 31–40:  5%
+        4 => 4.0,   // pull 41–50:  7.5%
+        5 => 5.0,   // pull 51–60:  10.0%
+        6 => 6.5,   // pull 61–70:  12.5%
+        7 => 7.0,   // pull 71–80:  15%
+        8 => 8.0,   // pull 81–90:  17.5%
+        9 => 20.0,   // pull 91–99:  25%
     ];
     return isset($rateTable[$stage]) ? $rateTable[$stage] : 95.0;
 }
