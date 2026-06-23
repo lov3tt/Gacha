@@ -1,0 +1,42 @@
+/* frontend/src/styles.css — global styles applied to the whole app.
+   Component-specific styles go in each component's own .css file. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+h1, h2, h3 {
+  margin-bottom: 12px;
+}
+
+/* Rarity colours — shared across components */
+.rarity-5 { border: 2px solid gold; }
+.rarity-4 { border: 2px solid #b266ff; }
+.rarity-3 { border: 2px solid #888; }
+
+.star-5 { color: gold; }
+.star-4 { color: #b266ff; }
+.star-3 { color: #aaa; }
+
+table {
+  margin: 20px auto;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 500px;
+}
+
+td, th {
+  padding: 6px 14px;
+  border-bottom: 1px solid #333;
+  font-size: 14px;
+}

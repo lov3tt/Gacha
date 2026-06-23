@@ -1,0 +1,48 @@
+<!-- frontend/src/app/components/pity-bar/pity-bar.component.html -->
+
+<!-- Only render if pityData has been loaded (not null) -->
+<div class="pity-box" *ngIf="pityData">
+
+  <!-- ── 5-star pity bar ── -->
+  <div class="pity-row">
+    <div class="pity-label-row">
+      <span>⭐⭐⭐⭐⭐ Pity: <strong>{{ pityData.count_5star }} / 100</strong></span>
+      <span>Current rate: <strong>{{ pityData.current_rate }}%</strong></span>
+    </div>
+
+    <div class="pity-bar-bg">
+      <!--
+        [ngClass]="fiveStarBarClass" → binds CSS class dynamically
+        [style.width.%]="fiveStarPercent" → sets width as a percentage
+        Both update automatically when pityData changes
+      -->
+      <div class="pity-bar-fill"
+           [ngClass]="fiveStarBarClass"
+           [style.width.%]="fiveStarPercent">
+      </div>
+    </div>
+
+    <div class="pity-sub-label">{{ fiveStarLabel }}</div>
+  </div>
+
+  <!-- ── 4-star pity bar ── -->
+  <div class="pity-row">
+    <div class="pity-label-row">
+      <span>⭐⭐⭐⭐ Pity: <strong>{{ pityData.count_4star }} / 10</strong></span>
+    </div>
+
+    <div class="pity-bar-bg">
+      <div class="pity-bar-fill pity-4star"
+           [style.width.%]="fourStarPercent">
+      </div>
+    </div>
+
+    <div class="pity-sub-label">{{ fourStarLabel }}</div>
+  </div>
+
+</div>
+
+<!-- Loading state — shown while pityData is still null -->
+<div class="pity-loading" *ngIf="!pityData">
+  Loading pity data...
+</div>

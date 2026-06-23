@@ -1,0 +1,28 @@
+<!-- frontend/src/app/components/pull/pull.component.html -->
+
+<!-- Pull button -->
+<!-- (click)="pull()" → calls pull() when clicked (Angular's event binding) -->
+<!-- [disabled]="isLoading" → disables button while waiting for response -->
+<button class="pull-btn" (click)="pull()" [disabled]="isLoading">
+  <!-- {{ }} outputs a variable — like <?= ?> in PHP -->
+  <!-- The ternary here shows "Pulling..." while loading, "Pull x1" otherwise -->
+  {{ isLoading ? 'Pulling...' : 'Pull x1' }}
+</button>
+
+<!-- Error message — only shows if error is not empty -->
+<!-- *ngIf is Angular's conditional — like <?php if (): ?> in PHP -->
+<p class="error" *ngIf="error">{{ error }}</p>
+
+<!-- Result card — only shows after a pull has been made -->
+<div class="result" *ngIf="pulledItem" [ngClass]="getRarityClass()">
+
+  <!-- Pity trigger messages -->
+  <p class="pity-msg" *ngIf="wasPity5">⚡ Hard pity triggered!</p>
+  <p class="pity-msg" *ngIf="wasPity4">💜 4-star pity triggered!</p>
+
+  <!-- Item display -->
+  <h2>{{ getStars(pulledItem.rarity) }}</h2>
+  <h2>{{ pulledItem.name }}</h2>
+  <p>{{ pulledItem.rarity }}-star</p>
+
+</div>

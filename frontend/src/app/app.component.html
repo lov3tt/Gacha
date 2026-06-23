@@ -1,0 +1,16 @@
+<!-- frontend/src/app/app.component.html — root template.
+     This is the main layout. Each child component is a custom HTML tag.
+     [pityData]="pityData" passes data DOWN to the child component.
+     (pullComplete)="onPullComplete($event)" listens for events coming UP
+     from the child component. -->
+
+<h1>🎰 Gacha Pull</h1>
+
+<!-- Pity bars — receives pityData from AppComponent -->
+<app-pity-bar [pityData]="pityData"></app-pity-bar>
+
+<!-- Pull button + result card — emits an event when pull completes -->
+<app-pull (pullComplete)="onPullComplete($event)"></app-pull>
+
+<!-- History table + popup — receives history data from AppComponent -->
+<app-history [history]="history"></app-history>

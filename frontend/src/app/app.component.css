@@ -1,0 +1,7 @@
+/* frontend/src/app/app.component.css — styles scoped to AppComponent only.
+   Global styles (body, table, rarity colours) live in styles.css instead. */
+
+h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}

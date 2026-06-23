@@ -1,0 +1,35 @@
+/* frontend/src/app/components/pull/pull.component.css */
+
+.pull-btn {
+  font-size: 18px;
+  padding: 14px 32px;
+  background: #e94560;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.pull-btn:hover:not(:disabled) { background: #d63852; }
+.pull-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.result {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 300px;
+  border-radius: 10px;
+  background: #16213e;
+}
+
+.pity-msg {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+.error {
+  color: #e94560;
+  font-size: 14px;
+  margin-top: 10px;
+}
