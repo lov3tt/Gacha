@@ -134,9 +134,9 @@ function rollRarity(int $pityCount, int $pityCount4star): int
     $rateTable = [
         0 =>   1,   // pull  1–10:  0.1% (minimum 1 to keep non-zero chance)
         1 =>  10,   // pull 11–20:  1.0%
-        2 =>  20,   // pull 21–30:  2.0%
-        3 =>  30,   // pull 31–40:  3.0%
-        4 => 40,   // pull 41–50:  4.0%
+        2 =>  15,   // pull 21–30:  1.5%
+        3 =>  20,   // pull 31–40:  2.0%
+        4 => 25,   // pull 41–50:  2.5%
         5 => 50,   // pull 51–60:  5.0%
         6 => 60,   // pull 61–70:  6.0%
         7 => 70,   // pull 71–80:  7.0%
@@ -176,14 +176,14 @@ function getCurrentFiveStarRate(int $pityCount): float
     $rateTable = [
         0 => 0.1,   // pull  1–10:  0.05%
         1 => 1.0,   // pull 11–20:  1.25%
-        2 => 2.0,    // pull 21–30:  2.5%
-        3 => 3.0,    // pull 31–40:  5%
-        4 => 4.0,   // pull 41–50:  7.5%
-        5 => 5.0,   // pull 51–60:  10.0%
-        6 => 6.0,   // pull 61–70:  12.5%
-        7 => 7.0,   // pull 71–80:  15%
-        8 => 8.0,   // pull 81–90:  17.5%
-        9 => 20.0,   // pull 91–99:  25%
+        2 => 1.5,    // pull 21–30:  1.5%
+        3 => 2.0,    // pull 31–40:  2%
+        4 => 2.5,   // pull 41–50:  2.5%
+        5 => 5.0,   // pull 51–60:  5.0%
+        6 => 6.0,   // pull 61–70:  6.0%
+        7 => 7.0,   // pull 71–80:  7%
+        8 => 8.0,   // pull 81–90:  8.0%
+        9 => 20.0,   // pull 91–99:  20%
     ];
     return isset($rateTable[$stage]) ? $rateTable[$stage] : 95.0;
 }
