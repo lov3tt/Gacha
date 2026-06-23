@@ -180,7 +180,7 @@ function getCurrentFiveStarRate(int $pityCount): float
         3 => 3.0,    // pull 31–40:  5%
         4 => 4.0,   // pull 41–50:  7.5%
         5 => 5.0,   // pull 51–60:  10.0%
-        6 => 6.5,   // pull 61–70:  12.5%
+        6 => 6.0,   // pull 61–70:  12.5%
         7 => 7.0,   // pull 71–80:  15%
         8 => 8.0,   // pull 81–90:  17.5%
         9 => 20.0,   // pull 91–99:  25%
