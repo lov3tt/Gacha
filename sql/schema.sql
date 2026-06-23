@@ -11,6 +11,19 @@ CREATE TABLE IF NOT EXISTS items (
     image_url VARCHAR(255) DEFAULT NULL  -- optional, for showing item art later
 );
 
+-- ── Table: user_stats ─────────────────────────────────────────
+-- Tracks per-user gacha statistics. One row per user.
+-- This is where the pity counter lives — it must persist across
+-- page loads and sessions, so it can't just be a PHP variable.
+CREATE TABLE IF NOT EXISTS user_stats (
+    user_id          INT PRIMARY KEY,         -- one row per user, user_id is the key
+    pity_count       INT NOT NULL DEFAULT 0,  -- pulls since last 5-star (resets to 0 on 5-star)
+                                              -- increments by 1 on every non-5-star pull
+    pity_count_4star INT NOT NULL DEFAULT 0   -- pulls since last 4-or-5-star
+                                              -- resets to 0 on any 4-star or 5-star pull
+                                              -- guaranteed 4-star at every 10th pull
+);
+
 -- ── Table: pulls ──────────────────────────────────────────────
 -- A log of every pull ever made. One row = one pull event.
 -- This table is what lets us calculate pity later (count rows
