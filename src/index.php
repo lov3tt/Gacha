@@ -50,31 +50,31 @@ function getPityCounts(PDO $pdo, int $userId): array
 }
 
 // ── Pity: update both pity counters after a pull ─────────────────
-function updatePityCount(PDO $pdo, int $userId, int $rarity, int $pityCount4star): void
+function updatePityCount(PDO $pdo, int $userId, int $rarity): void
 {
-    // 4-star counter runs on a FIXED 10-pull schedule:
-    //   - Every pull increments it by 1, regardless of what dropped
-    //   - Natural 4-star or 5-star pulls do NOT reset it
-    //   - Only resets to 0 when the guaranteed 10th pull triggers
-    $fourStarWasGuaranteed = ($pityCount4star >= 9);
-
     if ($rarity === 5) {
         // 5-star resets ONLY the 5-star counter.
-        // 4-star counter resets if the guarantee triggered this pull,
-        // otherwise just increments as normal.
+        // The 4-star counter keeps incrementing independently —
+        // a 5-star pull does NOT count as satisfying the 4-star pity.
         $stmt = $pdo->prepare(
             "UPDATE user_stats
-             SET pity_count = 0,
-                 pity_count_4star = " . ($fourStarWasGuaranteed ? "0" : "pity_count_4star + 1") . "
+             SET pity_count = 0, pity_count_4star = pity_count_4star + 1
+             WHERE user_id = :user_id"
+        );
+    } elseif ($rarity === 4) {
+        // 4-star resets only the 4-star counter, keeps the 5-star
+        // counter incrementing — getting a 4-star doesn't help your
+        // progress toward a 5-star.
+        $stmt = $pdo->prepare(
+            "UPDATE user_stats
+             SET pity_count = pity_count + 1, pity_count_4star = 0
              WHERE user_id = :user_id"
         );
     } else {
-        // 3-star and 4-star both increment the 5-star counter.
-        // 4-star counter resets if the guarantee triggered, otherwise increments.
+        // 3-star increments both counters.
         $stmt = $pdo->prepare(
             "UPDATE user_stats
-             SET pity_count = pity_count + 1,
-                 pity_count_4star = " . ($fourStarWasGuaranteed ? "0" : "pity_count_4star + 1") . "
+             SET pity_count = pity_count + 1, pity_count_4star = pity_count_4star + 1
              WHERE user_id = :user_id"
         );
     }
@@ -244,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     logPull($pdo, $userId, $pulledItem['id']);
 
     // Update both pity counters based on what rarity was pulled.
-    updatePityCount($pdo, $userId, $rarity, $pityCount4star);
+    updatePityCount($pdo, $userId, $rarity);
 
     // Refresh both counters for display AFTER the update.
     $pityCounts      = getPityCounts($pdo, $userId);
@@ -252,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pityCount4star  = $pityCounts['pity_count_4star'];
 }
 
-// ── Fetch recent pull history ─────────────────────────────────────
+// ── Fetch recent pull history (10 for main table) ────────────────
 // JOIN combines "pulls" and "items" rows where item_id matches id,
 // so we get the item name and rarity alongside the pull timestamp.
 $historyStmt = $pdo->prepare(
@@ -265,6 +265,19 @@ $historyStmt = $pdo->prepare(
 );
 $historyStmt->execute(['user_id' => $userId]);
 $history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// ── Fetch last 100 pulls for the popup ───────────────────────────
+// Same query, just a larger LIMIT — used by the "View History" popup.
+$fullHistoryStmt = $pdo->prepare(
+    "SELECT items.name, items.rarity, pulls.pulled_at
+     FROM pulls
+     JOIN items ON pulls.item_id = items.id
+     WHERE pulls.user_id = :user_id
+     ORDER BY pulls.pulled_at DESC
+     LIMIT 100"
+);
+$fullHistoryStmt->execute(['user_id' => $userId]);
+$fullHistory = $fullHistoryStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ── Determine soft pity status for UI display ─────────────────────
 // Soft pity = any stage past the first (pull 11+)
@@ -342,6 +355,75 @@ $currentRate = getCurrentFiveStarRate($pityCount);
         .star-5 { color: gold; }
         .star-4 { color: #b266ff; }
         .star-3 { color: #aaa; }
+
+        /* View history button */
+        .history-btn {
+            margin-top: 12px;
+            font-size: 14px;
+            padding: 8px 20px;
+            background: #0f3460;
+            color: #eee;
+            border: 1px solid #1a4a8a;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .history-btn:hover { background: #1a4a8a; }
+
+        /* Modal backdrop — covers the whole screen, darkens background */
+        .modal-backdrop {
+            display: none;            /* hidden by default, shown via JS */
+            position: fixed;          /* stays in place even when scrolling */
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75); /* semi-transparent dark overlay */
+            z-index: 1000;            /* sits on top of everything else */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal box — the white-ish card in the centre of the screen */
+        .modal-box {
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;         /* never taller than 80% of screen height */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;         /* clips content that overflows the rounded corners */
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #0f3460;
+        }
+        .modal-header h3 { margin: 0; font-size: 16px; }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .modal-close:hover { color: #fff; }
+        .modal-summary {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 13px;
+            border-bottom: 1px solid #0f3460;
+        }
+        /* Scrollable table area inside the modal */
+        .modal-scroll {
+            overflow-y: auto;         /* scrolls vertically if content overflows */
+            flex: 1;                  /* takes up remaining space inside the modal box */
+            padding: 0 8px 8px;
+        }
     </style>
 </head>
 <body>
@@ -409,7 +491,7 @@ $currentRate = getCurrentFiveStarRate($pityCount);
         </div>
     <?php endif; ?>
 
-    <!-- ── Pull history ── -->
+    <!-- ── Pull history (last 10) ── -->
     <h3>Recent Pulls</h3>
     <table>
         <tr><th>Item</th><th>Rarity</th><th>When</th></tr>
@@ -421,6 +503,69 @@ $currentRate = getCurrentFiveStarRate($pityCount);
             </tr>
         <?php endforeach; ?>
     </table>
+
+    <!-- ── View full history button ── -->
+    <button class="history-btn" onclick="document.getElementById('historyModal').style.display='flex'">
+        📜 View Last 100 Pulls
+    </button>
+
+    <!-- ── Full history popup (modal) ── -->
+    <!--
+        A modal is just a div that covers the whole screen.
+        display:none hides it by default.
+        Clicking the button above sets display:flex to show it.
+        Clicking the backdrop or X button hides it again.
+    -->
+    <div id="historyModal" class="modal-backdrop" onclick="closeModal(event)">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>📜 Pull History (Last 100)</h3>
+                <button class="modal-close" onclick="document.getElementById('historyModal').style.display='none'">✕</button>
+            </div>
+
+            <!-- Summary counts at the top of the modal -->
+            <?php
+                // Count how many of each rarity are in the full history
+                $count5 = count(array_filter($fullHistory, fn($r) => $r['rarity'] == 5));
+                $count4 = count(array_filter($fullHistory, fn($r) => $r['rarity'] == 4));
+                $count3 = count(array_filter($fullHistory, fn($r) => $r['rarity'] == 3));
+                $total  = count($fullHistory);
+            ?>
+            <div class="modal-summary">
+                <span class="star-5">⭐⭐⭐⭐⭐ <?= $count5 ?></span>
+                <span class="star-4">⭐⭐⭐⭐ <?= $count4 ?></span>
+                <span class="star-3">⭐⭐⭐ <?= $count3 ?></span>
+                <span style="color:#aaa">Total: <?= $total ?></span>
+            </div>
+
+            <div class="modal-scroll">
+                <table>
+                    <tr><th>#</th><th>Item</th><th>Rarity</th><th>When</th></tr>
+                    <?php foreach ($fullHistory as $i => $row): ?>
+                        <tr class="star-<?= $row['rarity'] ?>">
+                            <!-- $i starts at 0, so +1 makes it human-readable (1, 2, 3...) -->
+                            <td style="color:#aaa"><?= $i + 1 ?></td>
+                            <td><?= htmlspecialchars($row['name']) ?></td>
+                            <td><?= $row['rarity'] ?>★</td>
+                            <td><?= $row['pulled_at'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // closeModal() is called when the dark backdrop is clicked.
+        // event.target is the element that was actually clicked —
+        // we only close if it's the backdrop itself, not the box inside it,
+        // so clicking inside the modal doesn't accidentally close it.
+        function closeModal(event) {
+            if (event.target === document.getElementById('historyModal')) {
+                document.getElementById('historyModal').style.display = 'none';
+            }
+        }
+    </script>
 
 </body>
 </html>
