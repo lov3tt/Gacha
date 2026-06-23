@@ -50,31 +50,31 @@ function getPityCounts(PDO $pdo, int $userId): array
 }
 
 // ── Pity: update both pity counters after a pull ─────────────────
-function updatePityCount(PDO $pdo, int $userId, int $rarity): void
+function updatePityCount(PDO $pdo, int $userId, int $rarity, int $pityCount4star): void
 {
+    // 4-star counter runs on a FIXED 10-pull schedule:
+    //   - Every pull increments it by 1, regardless of what dropped
+    //   - Natural 4-star or 5-star pulls do NOT reset it
+    //   - Only resets to 0 when the guaranteed 10th pull triggers
+    $fourStarWasGuaranteed = ($pityCount4star >= 9);
+
     if ($rarity === 5) {
         // 5-star resets ONLY the 5-star counter.
-        // The 4-star counter keeps incrementing independently —
-        // a 5-star pull does NOT count as satisfying the 4-star pity.
+        // 4-star counter resets if the guarantee triggered this pull,
+        // otherwise just increments as normal.
         $stmt = $pdo->prepare(
             "UPDATE user_stats
-             SET pity_count = 0, pity_count_4star = pity_count_4star + 1
-             WHERE user_id = :user_id"
-        );
-    } elseif ($rarity === 4) {
-        // 4-star resets only the 4-star counter, keeps the 5-star
-        // counter incrementing — getting a 4-star doesn't help your
-        // progress toward a 5-star.
-        $stmt = $pdo->prepare(
-            "UPDATE user_stats
-             SET pity_count = pity_count + 1, pity_count_4star = 0
+             SET pity_count = 0,
+                 pity_count_4star = " . ($fourStarWasGuaranteed ? "0" : "pity_count_4star + 1") . "
              WHERE user_id = :user_id"
         );
     } else {
-        // 3-star increments both counters.
+        // 3-star and 4-star both increment the 5-star counter.
+        // 4-star counter resets if the guarantee triggered, otherwise increments.
         $stmt = $pdo->prepare(
             "UPDATE user_stats
-             SET pity_count = pity_count + 1, pity_count_4star = pity_count_4star + 1
+             SET pity_count = pity_count + 1,
+                 pity_count_4star = " . ($fourStarWasGuaranteed ? "0" : "pity_count_4star + 1") . "
              WHERE user_id = :user_id"
         );
     }
@@ -244,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     logPull($pdo, $userId, $pulledItem['id']);
 
     // Update both pity counters based on what rarity was pulled.
-    updatePityCount($pdo, $userId, $rarity);
+    updatePityCount($pdo, $userId, $rarity, $pityCount4star);
 
     // Refresh both counters for display AFTER the update.
     $pityCounts      = getPityCounts($pdo, $userId);
