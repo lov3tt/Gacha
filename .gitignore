@@ -25,6 +25,7 @@ docker-compose.override.yml
 composer.phar
 # test runner cache, machine-specific
 .phpunit.result.cache
+node_modules/
 
 # OS files — metadata Finder/Explorer create automatically, irrelevant to the project
 .DS_Store
