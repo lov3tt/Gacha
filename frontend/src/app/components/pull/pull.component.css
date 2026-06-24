@@ -20,6 +20,22 @@
   max-width: 300px;
   border-radius: 10px;
   background: #16213e;
+  position: relative; /* needed so the overlay positions inside the card */
+}
+
+/* Loading overlay — sits on top of the card while a pull is in flight.
+   The card stays visible underneath, just dimmed. */
+.loading-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(22, 33, 62, 0.85); /* semi-transparent dark blue */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #eee;
 }
 
 .pity-msg {

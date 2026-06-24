@@ -30,25 +30,22 @@ export class PullComponent {
 
   // Called when the user clicks the "Pull x1" button
   pull() {
-    this.isLoading  = true;
-    this.pulledItem = null;
-    this.error      = '';
+    this.isLoading = true;
+    // Don't clear pulledItem here — keep the previous result visible
+    // while waiting for the new pull to come back from PHP.
+    // It gets replaced naturally when the new result arrives in next().
+    this.error = '';
 
     this.gachaService.pull().subscribe({
-      // next() runs when PHP responds successfully
       next: (result) => {
-        // result is the parsed JSON from pull.php:
-        // { item: {...}, was_pity_5: bool, was_pity_4: bool, pity: {...} }
+        // New result arrived — NOW replace the card with the new pull.
+        // This happens in one frame so there's no gap between old and new.
         this.pulledItem = result.item;
         this.wasPity5   = result.was_pity_5;
         this.wasPity4   = result.was_pity_4;
         this.isLoading  = false;
-
-        // Emit the full result UP to AppComponent.
-        // AppComponent's (pullComplete) listener receives this.
         this.pullComplete.emit(result);
       },
-      // error() runs if the HTTP request failed (network error, PHP crash etc.)
       error: (err) => {
         this.error     = 'Pull failed — check that the PHP containers are running.';
         this.isLoading = false;

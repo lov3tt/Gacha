@@ -16,9 +16,12 @@ import { Observable } from 'rxjs';
 export class GachaService {
 
   // Base URL for all API calls.
-  // /api/ routes through Nginx to your PHP container.
-  // No need for http://localhost — Nginx handles routing internally.
-  private apiUrl = '/api';
+  // When accessed via Nginx (port 8080), /api/ gets routed to PHP.
+  // When accessed directly via Angular (port 4200), we need the full URL.
+  // We check the current port and use the right base URL accordingly.
+  private apiUrl = window.location.port === '4200'
+    ? 'http://localhost:8080/api'  // direct Angular access — point to Nginx
+    : '/api';                       // through Nginx — relative URL works
 
   // HttpClient is Angular's built-in HTTP library.
   // We "inject" it via the constructor — Angular provides it automatically.

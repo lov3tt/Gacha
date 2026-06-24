@@ -60,12 +60,40 @@ export class AppComponent implements OnInit {
   }
 
   // ── onPullComplete() ──────────────────────────────────────────
-  // Called by PullComponent (child) after a successful pull via
-  // an EventEmitter — the child tells the parent "a pull happened,
-  // here's the new pity data". The parent then updates its state,
-  // which flows back down to PityBarComponent and HistoryComponent.
+  // Called by PullComponent (child) after a successful pull.
+  // Instead of reloading history from the API (which causes flicker),
+  // we update the history arrays directly in memory — instant, no reload.
   onPullComplete(result: any) {
-    this.pityData = result.pity;  // update pity bars immediately
-    this.loadHistory();            // reload history to show new pull
+    // Update pity bars immediately from the pull result
+    this.pityData = result.pity;
+
+    // Build a new history entry from the pull result
+    // so we don't need a second API call to history.php
+    const newEntry = {
+      name:      result.item.name,
+      rarity:    result.item.rarity,
+      pulled_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    if (this.history) {
+      // Prepend the new pull to the front of both lists
+      // (most recent first, matching ORDER BY pulled_at DESC in PHP)
+      const newRecent = [newEntry, ...this.history.recent].slice(0, 10);
+      const newFull   = [newEntry, ...this.history.full].slice(0, 100);
+
+      // Recount the summary totals
+      const count5 = newFull.filter((r: any) => r.rarity == 5).length;
+      const count4 = newFull.filter((r: any) => r.rarity == 4).length;
+      const count3 = newFull.filter((r: any) => r.rarity == 3).length;
+
+      // Spread operator creates a NEW object so Angular detects the change
+      // and re-renders — mutating the existing object directly wouldn't
+      // trigger Angular's change detection.
+      this.history = {
+        recent:  newRecent,
+        full:    newFull,
+        summary: { '5star': count5, '4star': count4, '3star': count3, total: newFull.length }
+      };
+    }
   }
 }

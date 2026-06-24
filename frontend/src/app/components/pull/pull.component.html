@@ -1,26 +1,25 @@
 <!-- frontend/src/app/components/pull/pull.component.html -->
 
 <!-- Pull button -->
-<!-- (click)="pull()" → calls pull() when clicked (Angular's event binding) -->
-<!-- [disabled]="isLoading" → disables button while waiting for response -->
 <button class="pull-btn" (click)="pull()" [disabled]="isLoading">
-  <!-- {{ }} outputs a variable — like <?= ?> in PHP -->
-  <!-- The ternary here shows "Pulling..." while loading, "Pull x1" otherwise -->
   {{ isLoading ? 'Pulling...' : 'Pull x1' }}
 </button>
 
-<!-- Error message — only shows if error is not empty -->
-<!-- *ngIf is Angular's conditional — like <?php if (): ?> in PHP -->
+<!-- Error message -->
 <p class="error" *ngIf="error">{{ error }}</p>
 
-<!-- Result card — only shows after a pull has been made -->
+<!-- Result card — stays visible between pulls, shows overlay while loading -->
 <div class="result" *ngIf="pulledItem" [ngClass]="getRarityClass()">
 
-  <!-- Pity trigger messages -->
-  <p class="pity-msg" *ngIf="wasPity5">⚡ Hard pity triggered!</p>
-  <p class="pity-msg" *ngIf="wasPity4">💜 4-star pity triggered!</p>
+  <!-- Loading overlay — dims the card while a new pull is in flight -->
+  <!-- *ngIf="isLoading" shows it only while waiting for API response -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <span>✨ Pulling...</span>
+  </div>
 
-  <!-- Item display -->
+  <p class="pity-msg" *ngIf="wasPity5 && !isLoading">⚡ Hard pity triggered!</p>
+  <p class="pity-msg" *ngIf="wasPity4 && !isLoading">💜 4-star pity triggered!</p>
+
   <h2>{{ getStars(pulledItem.rarity) }}</h2>
   <h2>{{ pulledItem.name }}</h2>
   <p>{{ pulledItem.rarity }}-star</p>
