@@ -2,61 +2,48 @@
 
 <div *ngIf="history">
 
-  <!-- ── Recent pulls table (last 10) ── -->
-  <h3>Recent Pulls</h3>
-  <table>
-    <tr><th>Item</th><th>Rarity</th><th>When</th></tr>
+  <!-- Frosted glass wrapper around the history table and button -->
+  <div class="history-wrapper">
 
-    <!--
-      *ngFor is Angular's loop — like <?php foreach (): ?> in PHP.
-      "let row of history.recent" iterates over the recent array.
-      "let i = index" gives us the loop counter (0, 1, 2...).
-    -->
-    <tr *ngFor="let row of history.recent; let i = index"
-        [ngClass]="getStarClass(row.rarity)">
-      <td>{{ row.name }}</td>
-      <td>{{ row.rarity }}★</td>
-      <td>{{ row.pulled_at }}</td>
-    </tr>
-  </table>
+    <h3>Recent Pulls</h3>
+    <table>
+      <tr><th>Item</th><th>Rarity</th><th>When</th></tr>
+      <tr *ngFor="let row of history.recent; let i = index"
+          [ngClass]="getStarClass(row.rarity)">
+        <td>{{ row.name }}</td>
+        <td>{{ row.rarity }}★</td>
+        <td>{{ row.pulled_at }}</td>
+      </tr>
+    </table>
 
-  <!-- ── View full history button ── -->
-  <!-- (click)="openModal()" calls openModal() in the component -->
-  <button class="history-btn" (click)="openModal()">
-    📜 View Last 100 Pulls
-  </button>
+    <button class="history-btn" (click)="openModal()">
+      📜 View Last 100 Pulls
+    </button>
 
-  <!-- ── Full history modal popup ── -->
-  <!--
-    *ngIf="showModal" hides/shows the whole modal based on showModal variable.
-    (click)="onBackdropClick($event)" passes the click event to our handler.
-    $event is Angular's way of passing the native DOM event to the method.
-  -->
+  </div>
+
+  <!-- Full history modal popup -->
   <div class="modal-backdrop" *ngIf="showModal" (click)="onBackdropClick($event)">
     <div class="modal-box">
 
-      <!-- Modal header -->
       <div class="modal-header">
         <h3>📜 Pull History (Last 100)</h3>
-        <!-- (click)="closeModal()" closes the modal when X is clicked -->
         <button class="modal-close" (click)="closeModal()">✕</button>
       </div>
 
-      <!-- Summary counts -->
       <div class="modal-summary" *ngIf="history.summary">
         <span class="star-5">⭐⭐⭐⭐⭐ {{ history.summary['5star'] }}</span>
         <span class="star-4">⭐⭐⭐⭐ {{ history.summary['4star'] }}</span>
         <span class="star-3">⭐⭐⭐ {{ history.summary['3star'] }}</span>
-        <span style="color:#aaa">Total: {{ history.summary.total }}</span>
+        <span style="color:rgba(255,255,255,0.6)">Total: {{ history.summary.total }}</span>
       </div>
 
-      <!-- Scrollable full history table -->
       <div class="modal-scroll">
         <table>
           <tr><th>#</th><th>Item</th><th>Rarity</th><th>When</th></tr>
           <tr *ngFor="let row of history.full; let i = index"
               [ngClass]="getStarClass(row.rarity)">
-            <td style="color:#aaa">{{ i + 1 }}</td>
+            <td style="color:rgba(255,255,255,0.5)">{{ i + 1 }}</td>
             <td>{{ row.name }}</td>
             <td>{{ row.rarity }}★</td>
             <td>{{ row.pulled_at }}</td>
@@ -71,5 +58,5 @@
 
 <!-- Loading state -->
 <div *ngIf="!history">
-  <p style="color:#aaa">Loading history...</p>
+  <p style="color:rgba(255,255,255,0.7)">Loading history...</p>
 </div>

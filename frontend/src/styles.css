@@ -7,12 +7,44 @@
   padding: 0;
 }
 
+/* Animated pastel gradient background.
+   background-size: 400% 400% makes the gradient much larger than the
+   viewport — the animation then slowly pans through it, creating a
+   smooth colour-shift effect without any hard transitions.
+   animation-duration: 12s keeps it slow and relaxing, not distracting. */
+html {
+  min-height: 100%;
+}
+
 body {
   font-family: sans-serif;
-  background: #1a1a2e;
   color: #eee;
   text-align: center;
   padding: 40px 20px;
+  min-height: 100vh;
+
+  /* Gradient cycles through: pink → soft purple → periwinkle blue → fuchsia → back */
+  background: linear-gradient(
+    135deg,
+    #f9a8d4,
+    #c084fc,
+    #818cf8,
+    #e879f9,
+    #f9a8d4
+  );
+  background-size: 400% 400%;
+
+  /* Smoothly pans through the gradient in a loop */
+  animation: kitty-gradient 12s ease infinite;
+}
+
+/* Keyframes: moves the gradient anchor point from top-left to bottom-right
+   and back. CSS animates the intermediate positions automatically.
+   The 0% and 100% positions match so the loop is seamless. */
+@keyframes kitty-gradient {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
 }
 
 h1, h2, h3 {
@@ -24,19 +56,52 @@ h1, h2, h3 {
 .rarity-4 { border: 2px solid #b266ff; }
 .rarity-3 { border: 2px solid #888; }
 
-.star-5 { color: gold; }
-.star-4 { color: #b266ff; }
-.star-3 { color: #aaa; }
+/* 3-star → black for readability on frosted glass / light background */
+.star-3 { color: #111; }
+
+/* 4-star → purple stays, still readable */
+.star-4 { color: #7c3aed; }
+
+/* 5-star → dark animated rainbow gradient text.
+   background-clip: text makes the gradient show through the text only.
+   -webkit-text-fill-color: transparent makes the actual text invisible
+   so only the gradient background shows through — the standard trick
+   for gradient text in CSS. background-size + animation slowly shifts
+   the gradient left-to-right for a subtle shimmer effect. */
+.star-5 {
+  background: linear-gradient(
+    90deg,
+    #b91c1c,  /* dark red */
+    #b45309,  /* dark amber */
+    #15803d,  /* dark green */
+    #1d4ed8,  /* dark blue */
+    #7e22ce,  /* dark purple */
+    #be185d,  /* dark pink */
+    #b91c1c   /* back to red — seamless loop */
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-shift 4s linear infinite;
+  font-weight: 600;
+}
+
+@keyframes rainbow-shift {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 200% center; }
+}
 
 table {
   margin: 20px auto;
   border-collapse: collapse;
   width: 100%;
   max-width: 500px;
+  color: #111;
 }
 
 td, th {
   padding: 6px 14px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
   font-size: 14px;
 }

@@ -1,11 +1,16 @@
 /* frontend/src/app/components/pity-bar/pity-bar.component.css */
 
+/* Frosted glass pity bar card */
 .pity-box {
   margin: 20px auto;
   max-width: 400px;
-  background: #16213e;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
   padding: 14px 20px;
+  color: #111; /* dark text for readability on frosted glass */
 }
 
 .pity-row { margin-bottom: 14px; }
@@ -16,10 +21,37 @@
   justify-content: space-between;
   font-size: 14px;
   margin-bottom: 6px;
+  color: #111;
 }
 
+/* 5-star pity row — animated dark rainbow gradient text */
+.pity-label-5star {
+  background: linear-gradient(
+    90deg,
+    #b91c1c,
+    #b45309,
+    #15803d,
+    #1d4ed8,
+    #7e22ce,
+    #be185d,
+    #b91c1c
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-shift 4s linear infinite;
+  font-weight: 600;
+}
+
+@keyframes rainbow-shift {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 200% center; }
+}
+
+/* Slightly frosted track for the bar background */
 .pity-bar-bg {
-  background: #0f3460;
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 6px;
   height: 10px;
   overflow: hidden;
@@ -28,25 +60,25 @@
 .pity-bar-fill {
   height: 10px;
   border-radius: 6px;
-  transition: width 0.4s ease; /* smooth animation when bar updates */
+  transition: width 0.4s ease;
 }
 
 /* 5-star bar colours */
-.pity-normal { background: #4caf50; }  /* green  — base rate */
-.pity-soft   { background: #ff9800; }  /* orange — climbing rate */
-.pity-hard   { background: #e94560; }  /* red    — near guarantee */
+.pity-normal { background: #4caf50; }
+.pity-soft   { background: #ff9800; }
+.pity-hard   { background: #e94560; }
 
 /* 4-star bar colour */
-.pity-4star  { background: #b266ff; }  /* purple */
+.pity-4star  { background: #b266ff; }
 
 .pity-sub-label {
   font-size: 11px;
-  color: #aaa;
+  color: rgba(0, 0, 0, 0.5); /* dark muted for readability */
   margin-top: 4px;
 }
 
 .pity-loading {
-  color: #aaa;
+  color: #111;
   font-size: 13px;
   margin: 20px 0;
 }
