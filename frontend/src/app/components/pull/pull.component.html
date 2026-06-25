@@ -1,24 +1,73 @@
 <!-- frontend/src/app/components/pull/pull.component.html -->
+<!-- Slot machine gacha UI -->
 
-<!-- Pull button -->
-<button class="pull-btn" (click)="pull()" [disabled]="isLoading">
-  {{ isLoading ? 'Pulling...' : 'Pull x1' }}
-</button>
+<!-- ── 5-star screen flash overlay ── -->
+<!-- Sits above everything, fades in/out via CSS animation -->
+<div class="flash-overlay" *ngIf="showFlash"></div>
 
-<!-- Error message -->
-<p class="error" *ngIf="error">{{ error }}</p>
+<!-- ── Slot machine ── -->
+<div class="slot-machine">
 
-<!-- Result card — stays visible between pulls, shows overlay while loading -->
-<div class="result" *ngIf="pulledItem" [ngClass]="getRarityClass()">
+  <!-- Machine frame -->
+  <div class="machine-header">🎰 GACHA PULL</div>
 
-  <!-- Loading overlay — dims the card while a new pull is in flight -->
-  <!-- *ngIf="isLoading" shows it only while waiting for API response -->
-  <div class="loading-overlay" *ngIf="isLoading">
-    <span>✨ Pulling...</span>
+  <!-- Three reels -->
+  <div class="reels-container">
+
+    <!-- Reel 1 — stops first -->
+    <div class="reel" [ngClass]="{ 'reel-stopped': reel1Stopped, 'reel-spinning': isSpinning && !reel1Stopped }">
+      <div class="reel-window">
+        <!-- The symbol cycles via TypeScript, CSS controls the blur/animation -->
+        <span class="reel-symbol">{{ reel1Symbol }}</span>
+      </div>
+    </div>
+
+    <!-- Reel 2 — stops second -->
+    <div class="reel" [ngClass]="{ 'reel-stopped': reel2Stopped, 'reel-spinning': isSpinning && !reel2Stopped }">
+      <div class="reel-window">
+        <span class="reel-symbol">{{ reel2Symbol }}</span>
+      </div>
+    </div>
+
+    <!-- Reel 3 — stops last, shows rarity result symbol -->
+    <div class="reel" [ngClass]="{ 'reel-stopped': reel3Stopped, 'reel-spinning': isSpinning && !reel3Stopped }">
+      <div class="reel-window">
+        <span class="reel-symbol">{{ reel3Symbol }}</span>
+      </div>
+    </div>
+
   </div>
 
-  <p class="pity-msg" *ngIf="wasPity5 && !isLoading">⚡ Hard pity triggered!</p>
-  <p class="pity-msg" *ngIf="wasPity4 && !isLoading">💜 4-star pity triggered!</p>
+  <!-- Decorative line across all reels (the "payline") -->
+  <div class="payline"></div>
+
+  <!-- Pull button -->
+  <button
+    class="pull-btn"
+    (click)="pull()"
+    [disabled]="isLoading || isSpinning">
+    <span *ngIf="isLoading">Loading...</span>
+    <span *ngIf="isSpinning && !isLoading">🎰 Spinning...</span>
+    <span *ngIf="!isLoading && !isSpinning">PULL x1</span>
+  </button>
+
+</div>
+
+<!-- ── Error message ── -->
+<p class="error" *ngIf="error">{{ error }}</p>
+
+<!-- ── Result card — fades in after reels stop ── -->
+<!--
+  [ngClass] applies 'revealed' class when isRevealed = true,
+  which triggers the fade-in CSS animation.
+  getRarityClass() adds rarity-3, rarity-4, or rarity-5 for border colour.
+-->
+<div class="result"
+     *ngIf="pulledItem"
+     [ngClass]="[getRarityClass(), isRevealed ? 'revealed' : 'hidden']">
+
+  <p class="pity-msg" *ngIf="wasPity5">⚡ Hard pity triggered!</p>
+  <p class="pity-msg" *ngIf="wasPity4">💜 4-star pity triggered!</p>
 
   <h2>{{ getStars(pulledItem.rarity) }}</h2>
   <h2>{{ pulledItem.name }}</h2>

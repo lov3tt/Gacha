@@ -1,49 +1,195 @@
 /* frontend/src/app/components/pull/pull.component.css */
+/* Slot machine gacha — all animation lives here */
 
-.pull-btn {
+/* ── 5-star flash overlay ─────────────────────────────────────────
+   Covers the entire viewport with a gold flash when a 5-star drops.
+   position:fixed keeps it above everything regardless of scroll. */
+.flash-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle, rgba(255,215,0,0.6) 0%, rgba(255,140,0,0.3) 60%, transparent 100%);
+  pointer-events: none; /* doesn't block clicks underneath */
+  z-index: 9999;
+  animation: flash 0.8s ease-out forwards;
+}
+
+@keyframes flash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── Slot machine frame ───────────────────────────────────────── */
+.slot-machine {
+  display: inline-block;
+  background: linear-gradient(145deg, #1a1a3e, #0f0f2e);
+  border: 3px solid #4a4a8a;
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin: 20px auto;
+  box-shadow:
+    0 0 30px rgba(74, 74, 138, 0.4),  /* outer glow */
+    inset 0 0 20px rgba(0,0,0,0.5);   /* inner shadow for depth */
+}
+
+.machine-header {
   font-size: 18px;
-  padding: 14px 32px;
-  background: #e94560;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #f0c040;
+  text-shadow: 0 0 10px rgba(240, 192, 64, 0.8);
+  margin-bottom: 20px;
+}
+
+/* ── Reels container ──────────────────────────────────────────── */
+.reels-container {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+/* ── Individual reel ──────────────────────────────────────────── */
+.reel {
+  width: 90px;
+  height: 90px;
+  background: #0a0a1e;
+  border: 2px solid #3a3a6a;
+  border-radius: 8px;
+  overflow: hidden; /* clips the symbol so only one shows at a time */
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+/* Reel spinning state — blurs the symbol slightly for motion feel */
+.reel.reel-spinning .reel-window {
+  animation: blur-spin 0.08s steps(1) infinite;
+}
+
+/* Reel stopped state — gold border glow, symbol snaps clear */
+.reel.reel-stopped {
+  border-color: #f0c040;
+  box-shadow: 0 0 12px rgba(240, 192, 64, 0.5);
+}
+.reel.reel-stopped .reel-symbol {
+  filter: none;
+  animation: pop-in 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Reel window — centers the symbol inside the reel */
+.reel-window {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The emoji symbol inside each reel */
+.reel-symbol {
+  font-size: 40px;
+  line-height: 1;
+  transition: filter 0.1s;
+  filter: blur(0px);
+}
+
+/* Blur animation — creates motion blur during spin */
+@keyframes blur-spin {
+  0%   { filter: blur(0px); }
+  50%  { filter: blur(3px); }
+  100% { filter: blur(0px); }
+}
+
+/* Pop-in animation — symbol bounces slightly when reel stops */
+@keyframes pop-in {
+  0%   { transform: scale(0.7); }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* ── Payline ──────────────────────────────────────────────────────
+   The horizontal line across all three reels — classic slot machine. */
+.payline {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #f0c040, transparent);
+  margin: -52px 0 44px;  /* vertically centers it over the reels */
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ── Pull button ──────────────────────────────────────────────── */
+.pull-btn {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  padding: 12px 40px;
+  background: linear-gradient(145deg, #e94560, #c73050);
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 20px;
+  margin-top: 8px;
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 
-.pull-btn:hover:not(:disabled) { background: #d63852; }
-.pull-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.pull-btn:hover:not(:disabled) {
+  transform: translateY(-2px);     /* lifts slightly on hover */
+  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.6);
+}
 
+.pull-btn:active:not(:disabled) {
+  transform: translateY(1px);      /* presses down on click */
+  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
+}
+
+.pull-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Result card ──────────────────────────────────────────────── */
 .result {
   margin: 20px auto;
   padding: 20px;
   max-width: 300px;
   border-radius: 10px;
   background: #16213e;
-  position: relative; /* needed so the overlay positions inside the card */
+  position: relative;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Loading overlay — sits on top of the card while a pull is in flight.
-   The card stays visible underneath, just dimmed. */
-.loading-overlay {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(22, 33, 62, 0.85); /* semi-transparent dark blue */
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: #eee;
+/* Hidden state — card is in the DOM but invisible, shifted down slightly */
+.result.hidden {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
+/* Revealed state — fades in and slides up when reels finish */
+.result.revealed {
+  animation: reveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes reveal {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* Rarity borders — inherited from global styles.css */
+/* .rarity-5 → gold border */
+/* .rarity-4 → purple border */
+/* .rarity-3 → grey border */
+
+/* ── Pity messages ────────────────────────────────────────────── */
 .pity-msg {
   font-size: 13px;
   color: #aaa;
   margin-bottom: 8px;
 }
 
+/* ── Error message ────────────────────────────────────────────── */
 .error {
   color: #e94560;
   font-size: 14px;
