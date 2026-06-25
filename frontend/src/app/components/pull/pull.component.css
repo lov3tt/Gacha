@@ -176,7 +176,7 @@
 .result {
   margin: 6px auto;
   padding: 10px 16px;
-  max-width: 300px;
+  max-width: 425px;
   border-radius: 10px;
   position: relative;
   transition: opacity 0.3s ease, transform 0.3s ease;
