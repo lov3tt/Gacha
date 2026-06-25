@@ -1,0 +1,15 @@
+# .dockerignore — tells Docker which files to exclude from the build context.
+# Smaller build context = faster uploads to Render.
+
+node_modules/
+frontend/node_modules/
+.git/
+.env
+*.md
+Makefile
+COMMANDS.md
+sql/
+.gitignore
+docker-compose.yml
+Dockerfile
+nginx/default.conf
