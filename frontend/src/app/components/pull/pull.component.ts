@@ -32,15 +32,26 @@ export class PullComponent implements OnDestroy {
   reel2Stopped = false;
   reel3Stopped = false;
 
-  // Symbol pools shown on each reel while spinning.
-  // All three show random symbols — the real result replaces reel3
-  // when it stops. This is the classic slot machine illusion.
-  symbols = ['⚔️', '🏹', '🛡️', '🔮', '💎', '🌟', '🗡️', '🪄'];
+  // Symbols shown while spinning (cycle rapidly to create motion effect).
+  // 💎 is intentionally included here so it appears during the spin,
+  // but it only LANDS on all 3 reels for a 5-star pull.
+  symbols = ['🐾', '😹', '😻', '😸', '💎', '😺', '🐈‍⬛', '🐱'];
+
+  // 4-star matching symbols — any of these can be the winning symbol
+  // for a 4-star pull, but 💎 is excluded (reserved for 5-star only).
+  fourStarSymbols = ['😺', '😸', '🐱', '😹.'];
+
+  // 3-star symbols — used for non-matching reels on 3-star pulls
+  threeStarSymbols = ['🐾', '😻', '🐈‍⬛', '😹.'];
 
   // Current symbol shown on each reel (cycles during spin)
-  reel1Symbol = '⚔️';
-  reel2Symbol = '🏹';
-  reel3Symbol = '🛡️';
+  reel1Symbol = '🐾';
+  reel2Symbol = '😹.';
+  reel3Symbol = '😻';
+
+  // The winning symbol all 3 reels will land on — decided when spin starts.
+  // Set once pendingResult is known, used by all three reel stop handlers.
+  private winningSymbol = '🐾';
 
   // setTimeout handles so we can cancel them if the component is destroyed
   private timers: any[] = [];
@@ -85,6 +96,24 @@ export class PullComponent implements OnDestroy {
     this.isSpinning = true;
     this.playSpinSound();
 
+    // Decide the winning symbol NOW based on rarity, before any reel stops.
+    // All 3 reels will land on this same symbol when they stop.
+    //   5-star → always 💎 (exclusively reserved)
+    //   4-star → random symbol from fourStarSymbols (never 💎)
+    //   3-star → random symbol from threeStarSymbols
+    const rarity = this.pendingResult.item.rarity;
+    if (rarity === 5) {
+      this.winningSymbol = '💎';
+    } else if (rarity === 4) {
+      const idx = Math.floor(Math.random() * this.fourStarSymbols.length);
+      this.winningSymbol = this.fourStarSymbols[idx];
+    } else {
+      // 3-star: pick a random non-matching symbol for reel3,
+      // reels 1 and 2 will show different random symbols (no match)
+      const idx = Math.floor(Math.random() * this.threeStarSymbols.length);
+      this.winningSymbol = this.threeStarSymbols[idx];
+    }
+
     // Cycle symbols every 80ms to create spinning illusion
     // Each reel gets a slightly different interval for visual variety
     let i = 0;
@@ -99,10 +128,9 @@ export class PullComponent implements OnDestroy {
     // Reel 1 stops after 1.0 second
     const t1 = setTimeout(() => {
       this.reel1Stopped = true;
-      this.reel1Symbol  = this.getReelSymbol(1);
+      this.reel1Symbol  = this.getReelStopSymbol(1);
       this.playStopSound();
-      clearInterval(spinInterval); // stop reel1 cycling
-      // Start reel2-only cycling after reel1 stops
+      clearInterval(spinInterval);
       this.spinReels2And3(i);
     }, 1000);
     this.timers.push(t1);
@@ -118,10 +146,9 @@ export class PullComponent implements OnDestroy {
     }, 80);
     this.timers.push(spinInterval);
 
-    // Reel 2 stops after 0.8s more (1.8s total)
     const t2 = setTimeout(() => {
       this.reel2Stopped = true;
-      this.reel2Symbol  = this.getReelSymbol(2);
+      this.reel2Symbol  = this.getReelStopSymbol(2);
       this.playStopSound();
       clearInterval(spinInterval);
       this.spinReel3Only(i);
@@ -138,10 +165,10 @@ export class PullComponent implements OnDestroy {
     }, 80);
     this.timers.push(spinInterval);
 
-    // Reel 3 stops after 0.8s more (2.6s total) — reveals the real result
+    // Reel 3 always lands on winningSymbol — the decisive reel
     const t3 = setTimeout(() => {
       this.reel3Stopped = true;
-      this.reel3Symbol  = this.getRaritySymbol(); // show rarity icon
+      this.reel3Symbol  = this.winningSymbol;
       clearInterval(spinInterval);
       this.playStopSound();
       this.revealResult();
@@ -172,19 +199,41 @@ export class PullComponent implements OnDestroy {
   }
 
   // ── Reel symbol helpers ───────────────────────────────────────
-  // Returns a themed symbol for each reel position when it stops.
-  // Reels 1 and 2 show random symbols; reel 3 shows the rarity result.
-  getReelSymbol(reelNum: number): string {
-    const idx = Math.floor(Math.random() * this.symbols.length);
-    return this.symbols[idx];
-  }
+  // Decides what symbol each reel shows when it stops.
+  //
+  // Matching rules:
+  //   5-star → all 3 reels show 💎 (exclusively reserved for 5-star)
+  //   4-star → all 3 reels show the same fourStarSymbol (never 💎)
+  //   3-star → reels 1 and 2 show random non-matching symbols,
+  //            reel 3 shows winningSymbol (no triple match for 3-star)
+  //
+  // winningSymbol is set in startSpin() before any reel stops,
+  // so all three stop handlers can reference the same value.
+  getReelStopSymbol(reelNum: number): string {
+    const rarity = this.pendingResult?.item?.rarity;
 
-  getRaritySymbol(): string {
-    if (!this.pendingResult) return '❓';
-    const rarity = this.pendingResult.item.rarity;
-    if (rarity === 5) return '💎';
-    if (rarity === 4) return '🌟';
-    return '⚔️';
+    if (rarity === 5) {
+      // All three reels always show 💎 for 5-star
+      return '💎';
+    }
+
+    if (rarity === 4) {
+      // All three reels show the same 4-star winning symbol
+      return this.winningSymbol;
+    }
+
+    // 3-star: reels 1 and 2 show a random symbol that is NOT the winning symbol
+    // (ensures no accidental triple match on a 3-star pull)
+    if (reelNum === 1 || reelNum === 2) {
+      const nonMatchingPool = this.symbols.filter(s =>
+        s !== this.winningSymbol && s !== '💎'
+      );
+      const idx = Math.floor(Math.random() * nonMatchingPool.length);
+      return nonMatchingPool[idx];
+    }
+
+    // Reel 3 always shows winningSymbol (the "decisive" reel)
+    return this.winningSymbol;
   }
 
   // ── 5-star flash effect ───────────────────────────────────────

@@ -1,31 +1,33 @@
 -- sql/seed.sql
--- Populates the "items" table with example pullable items.
+-- Kitty Treat Gacha — item seed data.
 -- Run this AFTER schema.sql has created the tables.
 
+-- Tell MySQL to interpret this file as utf8mb4 so emoji insert correctly.
+-- Without this, emoji bytes get misread as Latin-1 characters.
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 -- ── 5-star items (rarest tier) ───────────────────────────────
--- Genshin-style: very few 5-star items exist in the pool,
--- which is part of why the odds feel so low even at 0.6%.
 INSERT INTO items (name, rarity) VALUES
-    ('Crimson Phoenix', 5),
-    ('Void Empress', 5),
-    ('Stormbringer', 5);
+    ('🍗 Chicken Chuupa 🍗', 5),
+    ('🍣 Salmon Chuupa 🍣',  5),
+    ('🐟 Tuna Chuupa 🐟',    5);
 
 -- ── 4-star items (mid tier) ───────────────────────────────────
--- More 4-star items in the pool than 5-star, but still limited.
 INSERT INTO items (name, rarity) VALUES
-    ('Frost Knight', 4),
-    ('Jade Archer', 4),
-    ('Iron Sentinel', 4),
-    ('Wind Dancer', 4),
-    ('Ember Mystic', 4);
+    ('👋 Spank Kitty Butt 👋', 4),
+    ('👋 Pet the Kitty 👋',    4),
+    ('👋 Rub Kitty Chin 👋',   4),
+    ('😽 Kiss the Kitty 😽',   4),
+    ('👃 Boop the Kitty 👃',   4);
 
 -- ── 3-star items (common tier) ────────────────────────────────
--- The largest pool — this is the "everything else" bucket
--- that makes up 94.3% of pulls.
 INSERT INTO items (name, rarity) VALUES
-    ('Rusty Sword', 3),
-    ('Wooden Shield', 3),
-    ('Travel Boots', 3),
-    ('Simple Bow', 3),
-    ('Leather Armor', 3),
-    ('Basic Staff', 3);
+    ('Kitty is not impressed 😾',         3),
+    ('Kitty turned their back on you 🙀', 3),
+    ('Kitty walked away slowly... 🐾',    3),
+    ('Kitty judged you silently 😼',      3),
+    ('Kitty knocked it off the table 🐱', 3),
+    ('Kitty blinked once and left 😿',    3),
+    ('Kitty sat in the empty box 📦',     3),
+    ('Kitty ignored you completely 🐈',   3);

@@ -49,27 +49,27 @@ logs-nginx:
 # bash -c inside the container expands $MYSQL_* from the container's
 # own environment — password never appears on the host command line.
 db-schema:
-	type sql\schema.sql | docker compose exec -T db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\""
+	type sql\schema.sql | docker compose exec -T db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE""
 
 # Seed the items table (run seed.sql)
 db-seed:
-	type sql\seed.sql | docker compose exec -T db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\""
+	type sql\seed.sql | docker compose exec -T db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE""
 
 # Open a live MySQL shell inside the container (interactive)
 db-shell:
-	docker compose exec db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\""
+	docker compose exec db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE""
 
 # Show all items in the database
 db-items:
-	docker compose exec db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\" -e \"SELECT * FROM items;\""
+	docker compose exec db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE" -e \"SELECT * FROM items;\""
 
 # Show recent pull history
 db-pulls:
-	docker compose exec db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\" -e \"SELECT pulls.id, items.name, items.rarity, pulls.pulled_at FROM pulls JOIN items ON pulls.item_id = items.id ORDER BY pulls.pulled_at DESC LIMIT 20;\""
+	docker compose exec db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE" -e \"SELECT pulls.id, items.name, items.rarity, pulls.pulled_at FROM pulls JOIN items ON pulls.item_id = items.id ORDER BY pulls.pulled_at DESC LIMIT 20;\""
 
 # Show all tables in the database
 db-tables:
-	docker compose exec db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\" -e \"SHOW TABLES;\""
+	docker compose exec db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE" -e \"SHOW TABLES;\""
 
 # ── App ──────────────────────────────────────────────────────────
 
@@ -85,6 +85,6 @@ setup:
 	docker compose up -d --build
 	@echo Waiting 20 seconds for MySQL to initialize...
 	timeout /t 20 /nobreak
-	type sql\schema.sql | docker compose exec -T db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\""
-	type sql\seed.sql | docker compose exec -T db bash -c "mysql -u \"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\""
+	type sql\schema.sql | docker compose exec -T db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE""
+	type sql\seed.sql | docker compose exec -T db bash -c "mysql --default-character-set=utf8mb4 -u "$$MYSQL_USER" -p"$$MYSQL_PASSWORD" "$$MYSQL_DATABASE""
 	@echo Done! Visit http://localhost:8080
