@@ -6,24 +6,36 @@
 // and then use the $pdo connection and functions defined here.
 
 // ── Database connection ───────────────────────────────────────────
-// Same pattern as before — read credentials from environment variables
-// injected by docker-compose.yml, never hardcoded.
-$host   = 'db';
+// Reads all connection details from environment variables.
+// Locally: MYSQL_HOST=db (Docker internal), no port needed, no SSL.
+// On Render + Aiven: MYSQL_HOST=<aiven-host>, MYSQL_PORT=<port>, SSL required.
+// This one db.php works for both environments — just change the .env values.
+$host   = getenv('MYSQL_HOST') ?: 'db';  // falls back to 'db' if not set
+$port   = getenv('MYSQL_PORT') ?: '3306';
 $dbname = getenv('MYSQL_DATABASE');
 $user   = getenv('MYSQL_USER');
 $pass   = getenv('MYSQL_PASSWORD');
+$useSSL = getenv('MYSQL_SSL') === 'true';
+
+// Build DSN — port included so external databases (Aiven etc.) work.
+// charset=utf8mb4 is required for emoji in item names.
+$dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
+
+// SSL options — Aiven requires encrypted connections.
+// MYSQL_ATTR_SSL_VERIFY_SERVER_CERT = false skips local CA cert validation
+// (Aiven's cert is valid; verifying it needs the CA file bundled in Docker).
+$options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+if ($useSSL) {
+    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+}
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
-    // In an API context we return JSON errors, not HTML.
-    // header() sets the HTTP response type so Angular knows it's JSON.
-    // http_response_code(500) tells Angular "something went wrong on the server".
     header('Content-Type: application/json');
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
-    exit; // stop execution immediately, don't run anything else
+    exit;
 }
 
 // ── Function: getPityCounts ───────────────────────────────────────
