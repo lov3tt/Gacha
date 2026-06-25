@@ -40,9 +40,8 @@ RUN apt-get update && apt-get install -y \
 # Copy Angular build output from Stage 1 into Nginx's web root
 COPY --from=angular-build /app/dist/gacha-frontend/browser/ /var/www/html/
 
-# Copy PHP API files
+# Copy PHP API files — these are the JSON endpoints Angular calls
 COPY api/ /var/www/api/
-COPY src/ /var/www/src/
 
 # Copy Nginx config
 COPY nginx/render.conf /etc/nginx/conf.d/default.conf
