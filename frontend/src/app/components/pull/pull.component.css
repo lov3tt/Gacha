@@ -23,23 +23,45 @@
 /* ── Slot machine frame ───────────────────────────────────────── */
 .slot-machine {
   display: inline-block;
-  background: linear-gradient(145deg, #1a1a3e, #0f0f2e);
-  border: 3px solid #4a4a8a;
+  /* Animated dark blue metallic gradient — same technique as the 5-star
+     rainbow text but applied to a background. background-size: 300% 300%
+     makes the gradient larger than the element so the animation has room
+     to pan through different colour zones, creating the shifting effect.
+     The colours are all dark blue/steel tones for the metallic look. */
+  background: linear-gradient(
+    135deg,
+    #0a0a2e,   /* deep navy */
+    #0d1b4b,   /* dark sapphire */
+    #0a2a5e,   /* steel blue */
+    #061a3a,   /* midnight blue */
+    #122060,   /* royal navy */
+    #0a0a2e    /* back to deep navy — seamless loop */
+  );
+  background-size: 300% 300%;
+  animation: metallic-shift 6s ease infinite;
+  border: 3px solid #2a4a8a;
   border-radius: 16px;
-  padding: 24px 32px;
-  margin: 20px auto;
+  padding: 12px 20px;
+  margin: 6px auto;
   box-shadow:
-    0 0 30px rgba(74, 74, 138, 0.4),  /* outer glow */
-    inset 0 0 20px rgba(0,0,0,0.5);   /* inner shadow for depth */
+    0 0 20px rgba(30, 60, 140, 0.5),
+    inset 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+/* Slow metallic pan — subtle enough not to be distracting */
+@keyframes metallic-shift {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
 }
 
 .machine-header {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
-  letter-spacing: 4px;
+  letter-spacing: 2px;
   color: #f0c040;
   text-shadow: 0 0 10px rgba(240, 192, 64, 0.8);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 /* ── Reels container ──────────────────────────────────────────── */
@@ -52,12 +74,12 @@
 
 /* ── Individual reel ──────────────────────────────────────────── */
 .reel {
-  width: 90px;
-  height: 90px;
-  background: #0a0a1e;
-  border: 2px solid #3a3a6a;
+  width: 72px;
+  height: 72px;
+  background: #050d20; /* very deep navy — darker than the machine so reels stand out */
+  border: 2px solid #1a3a6a;
   border-radius: 8px;
-  overflow: hidden; /* clips the symbol so only one shows at a time */
+  overflow: hidden;
   position: relative;
   transition: border-color 0.2s ease;
 }
@@ -88,7 +110,7 @@
 
 /* The emoji symbol inside each reel */
 .reel-symbol {
-  font-size: 40px;
+  font-size: 32px;
   line-height: 1;
   transition: filter 0.1s;
   filter: blur(0px);
@@ -113,7 +135,7 @@
 .payline {
   height: 2px;
   background: linear-gradient(90deg, transparent, #f0c040, transparent);
-  margin: -52px 0 44px;  /* vertically centers it over the reels */
+  margin: -42px 0 36px;  /* vertically centers it over the reels */
   opacity: 0.6;
   pointer-events: none;
 }
@@ -123,13 +145,13 @@
   font-size: 16px;
   font-weight: bold;
   letter-spacing: 2px;
-  padding: 12px 40px;
+  padding: 8px 28px;
   background: linear-gradient(145deg, #e94560, #c73050);
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 6px;
   box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
   transition: transform 0.1s, box-shadow 0.1s;
 }
@@ -152,13 +174,28 @@
 
 /* ── Result card ──────────────────────────────────────────────── */
 .result {
-  margin: 20px auto;
-  padding: 20px;
+  margin: 6px auto;
+  padding: 10px 16px;
   max-width: 300px;
   border-radius: 10px;
-  background: #16213e;
   position: relative;
   transition: opacity 0.3s ease, transform 0.3s ease;
+
+  /* Same animated metallic dark blue as the slot machine —
+     ties the two elements together visually as a set.
+     Slightly different gradient angle (160deg vs 135deg) so they
+     don't look perfectly identical, giving the card its own feel. */
+  background: linear-gradient(
+    160deg,
+    #061428,   /* very deep navy */
+    #0d1b4b,   /* dark sapphire */
+    #0a2a5e,   /* steel blue */
+    #0f1e50,   /* royal navy */
+    #061428    /* back to deep navy */
+  );
+  background-size: 300% 300%;
+  animation: metallic-shift 6s ease infinite;
+  border: 1px solid #2a4a8a;
 }
 
 /* Hidden state — card is in the DOM but invisible, shifted down slightly */

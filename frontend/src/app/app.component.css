@@ -1,26 +1,20 @@
 /* frontend/src/app/app.component.css */
 
-/* Frosted glass wrapper around the whole app content.
-   backdrop-filter: blur() blurs whatever is behind this element —
-   combined with a semi-transparent white background it creates
-   the "frosted glass" effect popular in modern UI design.
-   The gradient background shows through, blurred and softened. */
 :host {
   display: block;
-  max-width: 700px;
+  max-width: 600px;
   margin: 0 auto;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* Safari support */
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 32px 24px;
+  padding: 16px 16px 20px; /* reduced from 32px 24px */
 }
 
 h1 {
-  font-size: 28px;
-  margin-bottom: 20px;
+  font-size: 22px;       /* reduced from 28px */
+  margin-bottom: 8px;    /* reduced from 20px */
   color: #fff;
-  /* Text shadow makes the title pop against both light and dark backgrounds */
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }

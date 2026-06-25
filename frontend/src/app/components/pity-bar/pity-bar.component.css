@@ -2,18 +2,18 @@
 
 /* Frosted glass pity bar card */
 .pity-box {
-  margin: 20px auto;
+  margin: 8px auto;
   max-width: 400px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 14px;
-  padding: 14px 20px;
+  padding: 10px 16px;
   color: #111; /* dark text for readability on frosted glass */
 }
 
-.pity-row { margin-bottom: 14px; }
+.pity-row { margin-bottom: 8px; }
 .pity-row:last-child { margin-bottom: 0; }
 
 .pity-label-row {

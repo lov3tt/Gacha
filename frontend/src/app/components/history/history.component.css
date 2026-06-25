@@ -7,19 +7,19 @@
   -webkit-backdrop-filter: blur(8px);
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 16px;
-  margin-top: 12px;
+  padding: 10px 12px;
+  margin-top: 6px;
   color: #111; /* dark text for readability on frosted glass */
 }
 
 h3 {
   color: #111;
   text-shadow: none;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .history-btn {
-  margin-top: 12px;
+  margin-top: 6px;
   font-size: 14px;
   padding: 8px 20px;
   background: rgba(255, 255, 255, 0.2);

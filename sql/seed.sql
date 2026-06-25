@@ -15,11 +15,11 @@ INSERT INTO items (name, rarity) VALUES
 
 -- ── 4-star items (mid tier) ───────────────────────────────────
 INSERT INTO items (name, rarity) VALUES
-    ('👋 Spank Kitty Butt 👋', 4),
-    ('👋 Pet the Kitty 👋',    4),
-    ('👋 Rub Kitty Chin 👋',   4),
-    ('😽 Kiss the Kitty 😽',   4),
-    ('👃 Boop the Kitty 👃',   4);
+    ('Spank Kitty Butt 👋', 4),
+    ('Pet the Kitty 👋',    4),
+    ('Rub Kitty Chin 👋',   4),
+    ('Kiss the Kitty 😽',   4),
+    ('Boop the Kitty 👃',   4);
 
 -- ── 3-star items (common tier) ────────────────────────────────
 INSERT INTO items (name, rarity) VALUES

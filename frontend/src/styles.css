@@ -20,7 +20,7 @@ body {
   font-family: sans-serif;
   color: #eee;
   text-align: center;
-  padding: 40px 20px;
+  padding: 16px 12px;
   min-height: 100vh;
 
   /* Gradient cycles through: pink → soft purple → periwinkle blue → fuchsia → back */
@@ -48,7 +48,7 @@ body {
 }
 
 h1, h2, h3 {
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 /* Rarity colours — shared across components */
@@ -93,7 +93,7 @@ h1, h2, h3 {
 }
 
 table {
-  margin: 20px auto;
+  margin: 8px auto;
   border-collapse: collapse;
   width: 100%;
   max-width: 500px;
@@ -101,7 +101,7 @@ table {
 }
 
 td, th {
-  padding: 6px 14px;
+  padding: 4px 10px;
   border-bottom: 1px solid rgba(0,0,0,0.1);
   font-size: 14px;
 }
