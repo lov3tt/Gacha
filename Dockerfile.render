@@ -1,6 +1,4 @@
 # Dockerfile.render — single container for Render deployment.
-# Runs Nginx + PHP-FPM + pre-built Angular in one container.
-# supervisord manages both Nginx and PHP-FPM as processes.
 
 # ── Stage 1: Build Angular ────────────────────────────────────────
 FROM node:20-alpine AS angular-build
@@ -24,24 +22,29 @@ RUN apt-get update && apt-get install -y \
   && docker-php-ext-install pdo pdo_mysql mysqli zip \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy Angular build output from Stage 1 into Nginx's web root
+# PHP error config — log to stderr (visible in Render logs) but never output
+# to the HTTP response, which would break JSON parsing in Angular.
+RUN echo "log_errors = On" >> /usr/local/etc/php/php.ini \
+ && echo "error_log = /dev/stderr" >> /usr/local/etc/php/php.ini \
+ && echo "display_errors = Off" >> /usr/local/etc/php/php.ini \
+ && echo "display_startup_errors = Off" >> /usr/local/etc/php/php.ini \
+ && echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE" >> /usr/local/etc/php/php.ini
+
+# Configure PHP-FPM to listen on 127.0.0.1:9000
+RUN sed -i 's|listen = /var/run/php/php-fpm.sock|listen = 127.0.0.1:9000|' \
+    /usr/local/etc/php-fpm.d/www.conf || true
+RUN sed -i 's|listen = /var/run/php.*\.sock|listen = 127.0.0.1:9000|' \
+    /usr/local/etc/php-fpm.d/www.conf || true
+
+# Copy files
 COPY --from=angular-build /app/dist/gacha-frontend/browser/ /var/www/html/
-
-# Copy PHP API files
 COPY api/ /var/www/api/
-
-# Copy Nginx template config — uses ${PORT} which gets substituted at startup
 COPY nginx/render.conf /etc/nginx/conf.d/render.conf.template
-
-# Copy supervisord config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Copy startup script that substitutes PORT before launching supervisord
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 ENV PORT=10000
-
 EXPOSE 10000
 
 CMD ["/start.sh"]

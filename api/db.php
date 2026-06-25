@@ -22,11 +22,16 @@ $useSSL = getenv('MYSQL_SSL') === 'true';
 $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
 
 // SSL options — Aiven requires encrypted connections.
-// MYSQL_ATTR_SSL_VERIFY_SERVER_CERT = false skips local CA cert validation
-// (Aiven's cert is valid; verifying it needs the CA file bundled in Docker).
+// PHP 8.5 renamed PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT to
+// Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT. We support both versions
+// by checking which constant exists at runtime.
 $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
 if ($useSSL) {
-    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+    // Use the new PHP 8.5 constant if available, fall back to old name
+    $sslConstant = defined('Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT')
+        ? Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT
+        : PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT;
+    $options[$sslConstant] = false;
 }
 
 try {
