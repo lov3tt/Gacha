@@ -6,6 +6,20 @@
 
 <h1>🐱 Purrfect Slot 🐱</h1>
 
+<!-- Warming-up overlay — shown while the Aiven database powers on.
+     serverWaking is true until stats load; serverFailed is true if the
+     DB never came back after all retries. -->
+<div class="wake-overlay" *ngIf="serverWaking">
+  <div class="wake-spinner"></div>
+  <p class="wake-text">Warming up the server…</p>
+  <p class="wake-sub">The database naps when idle — this can take up to two minutes on the first visit. 🐾</p>
+</div>
+
+<div class="wake-overlay" *ngIf="serverFailed">
+  <p class="wake-text">Couldn't reach the server 😿</p>
+  <p class="wake-sub">The database is taking longer than usual. Try refreshing in a minute.</p>
+</div>
+
 <!-- Pity bars — receives pityData from AppComponent -->
 <app-pity-bar [pityData]="pityData"></app-pity-bar>
 

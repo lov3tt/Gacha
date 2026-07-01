@@ -18,3 +18,41 @@ h1 {
   color: #fff;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
+/* ── Warming-up overlay ─────────────────────────────────────────
+   Shown while the Aiven database powers on. A soft frosted card with
+   a spinning ring, matching the app's glassy pastel look. */
+.wake-overlay {
+  margin: 12px 0 4px;
+  padding: 20px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 16px;
+}
+
+.wake-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  border: 4px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;         /* the bright part that "chases" around */
+  border-radius: 50%;
+  animation: wake-spin 0.9s linear infinite;
+}
+
+@keyframes wake-spin {
+  to { transform: rotate(360deg); }
+}
+
+.wake-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.wake-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+}
