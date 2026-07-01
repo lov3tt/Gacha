@@ -1,6 +1,11 @@
+
 # 🎰 Kitty Treat Gacha
 
 A full-stack gacha pull simulator built from scratch, modeled after Genshin Impact's pull system — with a cat-themed item pool, an animated three-reel slot machine reveal, a dual pity engine, and persistent history, all backed by a hand-rolled PHP REST API. Ships two ways: local Docker Compose for development, and a single-container build for production deployment on Render.
+
+<img width="1280" height="720" alt="PuurfectSlot" src="https://github.com/user-attachments/assets/79f99f71-a991-47e5-9fcd-ae694988631c" />
+
+Check it out at: https://purrfectslot.onrender.com/
 
 ---
 
