@@ -40,6 +40,15 @@ export class GachaService {
     return this.http.post(`${this.apiUrl}/pull.php`, {});
   }
 
+  // ── wake() — GET /api/wake.php ──────────────────────────────
+  // Called once on page load to pre-warm the Aiven database.
+  // Aiven's free tier powers the DB off when idle; this asks PHP to
+  // send a "power on" signal so the DB starts waking before the user
+  // clicks "Pull". Doesn't touch the DB itself — just Aiven's API.
+  wake(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/wake.php`);
+  }
+
   // ── getHistory() — GET /api/history.php ─────────────────────
   // Called after each pull and on page load to refresh history.
   getHistory(): Observable<any> {

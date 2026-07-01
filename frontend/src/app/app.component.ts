@@ -23,28 +23,67 @@ export class AppComponent implements OnInit {
   pityData: any = null;    // current pity counts + rates for PityBarComponent
   history: any = null;     // pull history for HistoryComponent
 
+  // serverWaking — true while we're still waiting for the database to
+  // wake up. Drives the "warming up the server…" overlay in the template.
+  // Starts true on load and flips to false once stats load successfully.
+  serverWaking = true;
+
+  // serverFailed — true if the DB never came back after all our retries,
+  // so we can show a "couldn't reach the server" message instead of an
+  // endless spinner.
+  serverFailed = false;
+
+  // How many times we've retried loading stats while the DB wakes up.
+  // Aiven can take ~2 min to power on, so we retry for a few minutes.
+  private wakeAttempts = 0;
+  private readonly maxWakeAttempts = 40; // 40 × 5s ≈ 3.3 min
+
   // GachaService is injected automatically by Angular.
   // We don't write "new GachaService()" — Angular creates it and passes it in.
   constructor(private gachaService: GachaService) {}
 
   // ngOnInit runs once when the component first loads — like a constructor
   // but specifically for setup that needs the component to be ready.
-  // Here we load the initial pity state and history from the API.
   ngOnInit() {
+    // Fire the wake signal FIRST so Aiven starts powering on immediately.
+    // We don't wait for it — errors here are non-fatal (the retry loop
+    // below is what actually confirms the DB is ready).
+    this.gachaService.wake().subscribe({
+      next:  () => {},
+      error: () => {}
+    });
+
+    // Then start trying to load real data. loadStats() retries itself
+    // until the DB answers, and hides the overlay when it does.
     this.loadStats();
-    this.loadHistory();
   }
 
   // ── loadStats() ───────────────────────────────────────────────
   // Fetches pity counts from PHP so pity bars show correctly on load.
+  // While the database is still waking, stats.php fails — so we retry
+  // every 5 seconds, keeping the "warming up" overlay visible until the
+  // DB finally answers. Once it does, we load history and drop the overlay.
   loadStats() {
     this.gachaService.getStats().subscribe({
       next: (data) => {
         // data is the parsed JSON from stats.php
         // e.g. { pity: { count_5star: 23, count_4star: 7, ... } }
         this.pityData = data.pity;
+        this.serverWaking = false;   // DB is up — hide the overlay
+        this.loadHistory();          // now safe to fetch history
       },
-      error: (err) => console.error('Failed to load stats:', err)
+      error: (err) => {
+        console.error('Failed to load stats:', err);
+        this.wakeAttempts++;
+        if (this.wakeAttempts < this.maxWakeAttempts) {
+          // DB probably still powering on — wait 5s and try again.
+          setTimeout(() => this.loadStats(), 5000);
+        } else {
+          // Gave up after a few minutes — show an error instead of spinning.
+          this.serverWaking = false;
+          this.serverFailed = true;
+        }
+      }
     });
   }
 
